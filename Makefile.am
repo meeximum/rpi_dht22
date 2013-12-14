@@ -1,6 +1,7 @@
-bin_PROGRAMS = loldht
-loldht_SOURCES = dht22.c locking.c
+bin_PROGRAMS = rpi_dht
+rpi_dht_SOURCES = dht22.c locking.c
 AUTOMAKE_OPTIONS = foreign
+CFLAGS = -Wall -std=c99 -O2
 
 noinst_HEADERS = 
 

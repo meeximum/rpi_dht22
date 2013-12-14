@@ -86,7 +86,7 @@ static int read_dht22_dat(const int pin)
         if ((dht22_dat[2] & 0x80) != 0)  t *= -1;
 
 
-    printf("Pin = %i %% Humidity = %.2f %% Temperature = %.2f °C\n", pin, h, t );
+    printf("Pin = %i, Humidity = %.1f %%, Temperature = %.1f °C\n", pin, h, t );
     return 1;
   }
   else
@@ -108,7 +108,7 @@ int main (int argc, char** argv)
   int pins[argc-1];
   for(int i = 0; i < argc-1; i++)
   {
-    int pin = atoi(argc[i+1]);
+    int pin = atoi(argv[i+1]);
     if(pin < 0 || pin > 20)
     {
       printf("Invalid pin given: %i\n", pin);
