@@ -22,8 +22,8 @@ Options
 -------
 
 ./configure options:
-     --disable-silent-rules Show the make process (silent by default)
-     --disable-secure Disable compile with FORTIY_SOURCE and stack-protector (enabled by default)
-     --enable-development Compile with -g -O0 -Wall. Applies disable-secure automatically
+    --disable-silent-rules Show the make process (silent by default)
+    --disable-secure Disable compile with FORTIY_SOURCE and stack-protector (enabled by default)
+    --enable-development Compile with -g -O0 -Wall. Applies disable-secure automatically
 
 autogen.sh: Autoconf boostrap. Development use only.
