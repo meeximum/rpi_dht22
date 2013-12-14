@@ -3,6 +3,7 @@
  *	Simple test program to test the wiringPi functions
  *	Based on the existing dht11.c
  *	Amended by technion@lolware.net
+ *  Extensions by oliverschneider+sweetpi@gmail.com
  */
 
 #include <wiringPi.h>
@@ -16,7 +17,6 @@
 #include "locking.h"
 
 #define MAXTIMINGS 85
-#define DHTPIN 7
 static int dht22_dat[5] = {0,0,0,0,0};
 
 static uint8_t sizecvt(const int read)
@@ -32,7 +32,7 @@ static uint8_t sizecvt(const int read)
   return (uint8_t)read;
 }
 
-static int read_dht22_dat()
+static int read_dht22_dat(const int pin)
 {
   uint8_t laststate = HIGH;
   uint8_t counter = 0;
@@ -41,26 +41,26 @@ static int read_dht22_dat()
   dht22_dat[0] = dht22_dat[1] = dht22_dat[2] = dht22_dat[3] = dht22_dat[4] = 0;
 
   // pull pin down for 18 milliseconds
-  pinMode(DHTPIN, OUTPUT);
-  digitalWrite(DHTPIN, LOW);
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, LOW);
   delay(18);
   // then pull it up for 40 microseconds
-  digitalWrite(DHTPIN, HIGH);
+  digitalWrite(pin, HIGH);
   delayMicroseconds(40); 
   // prepare to read the pin
-  pinMode(DHTPIN, INPUT);
+  pinMode(pin, INPUT);
 
   // detect change and read data
   for ( i=0; i< MAXTIMINGS; i++) {
     counter = 0;
-    while (sizecvt(digitalRead(DHTPIN)) == laststate) {
+    while (sizecvt(digitalRead(pin)) == laststate) {
       counter++;
       delayMicroseconds(1);
       if (counter == 255) {
         break;
       }
     }
-    laststate = sizecvt(digitalRead(DHTPIN));
+    laststate = sizecvt(digitalRead(pin));
 
     if (counter == 255) break;
 
@@ -86,7 +86,7 @@ static int read_dht22_dat()
         if ((dht22_dat[2] & 0x80) != 0)  t *= -1;
 
 
-    printf("Humidity = %.2f %% Temperature = %.2f *C \n", h, t );
+    printf("Pin = %i %% Humidity = %.2f %% Temperature = %.2f °C\n", pin, h, t );
     return 1;
   }
   else
@@ -96,11 +96,26 @@ static int read_dht22_dat()
   }
 }
 
-int main (void)
+int main (int argc, char** argv)
 {
   int lockfd;
 
-  printf ("Raspberry Pi wiringPi DHT22 reader\nwww.lolware.net\n") ;
+  if(argc == 1) {
+    printf("usage rpi_dht pin1 [pin2...]\n");
+    exit(EXIT_FAILURE) ;
+  }
+
+  int pins[argc-1];
+  for(int i = 0; i < argc-1; i++)
+  {
+    int pin = atoi(argc[i+1]);
+    if(pin < 0 || pin > 20)
+    {
+      printf("Invalid pin given: %i\n", pin);
+      exit(EXIT_FAILURE);
+    }
+    pins[i] = pin;
+  }
 
   lockfd = open_lockfile(LOCKFILE);
 
@@ -113,10 +128,14 @@ int main (void)
     exit(EXIT_FAILURE);
   }
 
-  while (read_dht22_dat() == 0) 
+  for(int i = 0; i < sizeof(pins)/sizeof(pins[0]); i++)
   {
-     delay(1000); // wait 1sec to refresh
+    while (read_dht22_dat(pins[i]) == 0) 
+    {
+       delay(1000); // wait 1sec to refresh
+    }
   }
+
 
   delay(1500);
   close_lockfile(lockfd);
