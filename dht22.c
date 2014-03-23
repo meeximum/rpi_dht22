@@ -114,6 +114,7 @@ int main (int argc, char *argv[])
 
   if (wiringPiSetup () == -1)
     exit(EXIT_FAILURE) ;
+  piHiPri(99);
 	
   if (setuid(getuid()) < 0)
   {
